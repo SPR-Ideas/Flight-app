@@ -32,7 +32,7 @@ class flight(Base):
 
     __tablename__ = "Flight"
     id = Column(Integer,primary_key = True)
-    flight_Name = Column(String,unique=True)
+    flight_Name = Column(String)
     seat = Column(Integer)
     time = Column(String)
     from_place = Column(String)

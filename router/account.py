@@ -1,13 +1,14 @@
 from fastapi import APIRouter , Request
 from datetime import timedelta
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import Column
 from starlette.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends
 from fastapi_login import LoginManager
 from passlib.context import CryptContext
 from database.database import SessionLocal
-from database.models import user
+from database.models import flight, user
 from fastapi_login.exceptions import InvalidCredentialsException
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse ,JSONResponse ,RedirectResponse
@@ -33,6 +34,13 @@ class UserPd(BaseModel):
     name : str
     password : str
     location : str
+
+class Flight_Pd(BaseModel):
+    flight_name : str
+    seat : int
+    time : str
+    from_place : str
+    to_place : str
 
 
 @user_app.post("/login_user")
@@ -119,6 +127,18 @@ def login(request : Request):
     # return "HI"
 
 
+@user_app.get('/logout', response_class=HTMLResponse)
+def protected_route(request: Request,):
+    resp = RedirectResponse(url="/login", status_code=302)
+    manager.set_cookie(resp, "")
+    return resp
+
+def get_all_flights():
+    session =  SessionLocal()
+    flights_objects = session.query(flight).all()
+    return flights_objects
+
+
 @user_app.get("/",response_class=HTMLResponse)
 def home(request:Request, user_instance = Depends(manager)):
     """
@@ -128,8 +148,33 @@ def home(request:Request, user_instance = Depends(manager)):
 
 
     return templates.TemplateResponse(
-        "home.html",{"request":request}
+        "home.html",{
+            "request":request,
+            "flights" : get_all_flights()
+
+        }
     )
+
+def create_flight_instance(fl):
+    session = SessionLocal()
+
+    flight_object = flight(
+        flight_Name = fl.flight_name,
+        seat = fl.seat,
+        time = fl.time,
+        from_place = fl.from_place,
+        to_place = fl.to_place
+    )
+    session.add(flight_object)
+    session.commit()
+    session.close()
+
+
+@user_app.put("/create-flight")
+def create_flight(flight_pd : Flight_Pd):
+    create_flight_instance(flight_pd)
+    return "Done"
+
 
 
 
