@@ -16,6 +16,13 @@ class user(Base):
     password = Column(String)
     location = Column(String)
 
+class booked_form(Base):
+    __tablename__= 'booking form'
+
+    id = Column(Integer,primary_key=True)
+    user_id = Column(Integer)
+    flight_id = Column(Integer)
+
 
 class admin(Base):
 

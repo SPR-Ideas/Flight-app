@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<head>
+    <!-- <link href="style.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <script src="{{ url_for('static',path='main.js') }}"> </script>
+    <!-- <script src="main.js"></script> -->
+
+<div class="login">
+    <div class="form">
+      <h2>Admin User</h2>
+      <div class="form-field">
+        <label for="username"><i class="fa fa-user"></i></label>
+        <input id="username" type="text" name="mail" placeholder="Admin-Id" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+      <div class="form-field">
+        <label for="password"><i class="fa fa-lock"></i></label>
+        <input id="password" type="password" name="password" placeholder="Password" pattern=".{6,}" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+      <button type="submit" class="button" onclick="submit_admin()" >
+        <div class="arrow-wrapper">
+          <span class="arrow"></span>
+        </div>
+        <p class="button-text">SIGN IN</p>
+      </button>
+    </div>
+    <div class="finished">
+      <svg>
+        <use href="#svg-check" />
+      </svg>
+    </div>
+  </div>
+
+
+
+  <!-- //--- ## SVG SYMBOLS ############# -->
+  <svg style="display:none;">
+    <symbol id="svg-check" viewBox="0 0 130.2 130.2">
+      <polyline points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+    </symbol>
+  </svg>
+</body>
+
+<script>
+
+function AdimLogin(admin_id,passwd){
+    /*
+      it is used to login the admin account.
+     */
+    const XHR = new XMLHttpRequest();
+    const FD = new FormData();
+    FD.append("grant_type","")
+    FD.append("username",admin_id);
+    FD.append("password",passwd);
+    FD.append("client_id","");
+    FD.append("client_secret","");
+    FD.append("scope","");
+
+    // Define what happens in case of error
+    XHR.addEventListener( "error", function( event ) {
+      alert( 'Oops something went wrong' );
+    } );
+    // Define whaLoginDatat happens on successful data submission
+    XHR.addEventListener( "load", function(event) {
+      if(XHR.status == 200){
+          // redirect to home page.
+        window.location.replace(window.location.origin+"/admin-panel");
+      }
+      else{
+        alert(" Invalid user credentials");
+      }
+    });
+    // Set up our request
+    XHR.open( "POST", window.location.origin+"/admin-token");
+
+    XHR.setRequestHeader("Access-Control-Allow-Origin",window.location.origin);
+    XHR.setRequestHeader("Access-Control-Allow-Credentials", "true");
+    XHR.setRequestHeader("Access-Control-Allow-Methods", "POST");
+    XHR.setRequestHeader("Access-Control-Allow-Headers", "Content-Type");
+    // The data sent is what the user provided in the form
+    XHR.send( FD );
+}
+
+
+
+function submit_admin(){
+  /*
+    It is used validate and login the admin account
+  */
+  admin_id = document.getElementById("username");
+  passwd = document.getElementById("password");
+  // console.log(admin_id.value);
+  AdimLogin(admin_id.value,passwd.value);
+
+}
+</script>
+</html>

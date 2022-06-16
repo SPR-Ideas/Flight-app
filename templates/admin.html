@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+
+<body>
+    <nav>
+        <div class=" blue nav-wrapper">
+          <a href="#" class="brand-logo">Admin Panel</a>
+          <ul id="nav-mobile" class="right ">
+            <li><a href="/admin-logout">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="card-panel">
+            <h4>Flight inventories</h4>
+            <ul class="collapsible">
+                {% for i in flights%}
+                <li>
+                  <div class="collapsible-header"> <i class="material-icons">flight_takeoff</i> <b>{{i.flight_Name}}</b> <span class="   grey-text  badge right" ><b>{{i.from_place}} to {{i.to_place}}</b>  </span> <span class="white darken-3 red-text  badge" onclick='delete_flight("{{i.id}}")'><i class="material-icons right">delete</i></div>
+                  <div class="collapsible-body"><span>Flight Name : {{i.flight_Name}}
+                      <br>
+                      Time : {{i.time}}
+                      <br>
+                      No.of seats available : {{i.seat}}
+                      <br>
+                      From_place : {{i.from_place}}
+                      <br>
+                      To_place : {{i.to_place}}
+                  </span></div>
+                </li>
+                {%endfor%}
+              </ul>
+
+        </div>
+      </div>
+
+
+      <div class="fixed-action-btn">
+        <a class="btn-floating btn-large blue tooltipped modal-trigger"  href="#modal1" data-position="left" data-tooltip="Create a Flight">
+          <i class="large material-icons">add</i>
+        </a>
+      </div>
+
+
+ <!-- Modal Structure -->
+ <div id="modal1" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Create Flight Instance</h4>
+      <div class="row">
+          <div class="col s10 offset-s1">
+              <input id = "name" type="text" placeholder="Flight name">
+              <input id = "seat" type="number" placeholder="max_seat">
+              <input id="time" type="text" placeholder="time">
+              <input id = "from_place" type="text" placeholder="from_place">
+              <input id = "to_place" type="text" placeholder="to_place">
+          </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class=" waves-effect waves-green btn-flat" onclick="create_flight()">create</a>
+    </div>
+  </div>
+
+
+
+
+</body>
+<script>
+// import qs from 'qs';
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, {});
+  });
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems, {});
+  });
+
+   async function delete_flight(flight_id){
+        const res = await axios.post(
+        '/delete-flight',
+        {
+            flight_id: flight_id,
+            status :"done"
+        });
+
+        window.location.replace(window.location.origin+"/admin-panel");
+    }
+
+    async function create_flight(){
+        var flight_name_ = document.getElementById("name").value;
+        var seat_ = document.getElementById("seat").value;
+        var time_ = document.getElementById("time").value;
+        var from_place_ = document.getElementById("from_place").value;
+        var tplace_ = document.getElementById("to_place").value;
+        // var flight_name = document.getElementById("name");
+        let data = {
+        "flight_name": flight_name_,
+        "seat": parseInt(seat_),
+        "time": time_,
+        "from_place": from_place_,
+        "to_place": tplace_ }
+
+        // const res = await axios({
+        //     method : "POST",
+        //     headers :headers,
+        //     data : data,
+        //     url: "/create-flight"
+        // }
+
+        // );
+
+  const XHR = new XMLHttpRequest();
+
+  XHR.addEventListener( "error", function( event ) {
+  alert( 'Oops something went wrong' );
+
+  } );
+
+// Define what happens on successful data submission
+  XHR.addEventListener( "load", function(event) {
+
+
+  if(XHR.status == 201){
+      // redirect to admin-panel.
+    alert(" Booking for "+flight_name_+"has sucessfully Done");
+
+    setTimeout(()=>{ window.location.replace(window.location.origin+"/admin-panel")  } ,500)
+
+  }
+
+} );
+
+// Set up our request
+  XHR.open( "POST", window.location.origin+"/create-flight");
+
+  XHR.setRequestHeader("Access-Control-Allow-Origin",window.location.origin);
+  XHR.setRequestHeader("Access-Control-Allow-Credentials", "true");
+  XHR.setRequestHeader("Access-Control-Allow-Methods", "POST");
+  XHR.setRequestHeader('Content-Type', 'application/json')
+  XHR.send( JSON.stringify( data ));
+
+
+}
+</script>
+
+</html>

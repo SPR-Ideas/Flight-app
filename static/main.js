@@ -49,9 +49,14 @@ function LoginData(username,passwd){
 
 
 
+
+
+
 function submit(){
     username = document.getElementById("username").value;
     password = document.getElementById("password").value;
     LoginData(username,password)
 
 }
+
+

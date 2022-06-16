@@ -8,7 +8,7 @@ from fastapi import Depends
 from fastapi_login import LoginManager
 from passlib.context import CryptContext
 from database.database import SessionLocal
-from database.models import flight, user
+from database.models import flight, user ,booked_form
 from fastapi_login.exceptions import InvalidCredentialsException
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse ,JSONResponse ,RedirectResponse
@@ -41,6 +41,10 @@ class Flight_Pd(BaseModel):
     time : str
     from_place : str
     to_place : str
+
+class BookTicketPd(BaseModel):
+    flight_id :int
+    user_id : int
 
 
 @user_app.post("/login_user")
@@ -126,6 +130,14 @@ def login(request : Request):
     )
     # return "HI"
 
+@user_app.get("/register")
+def login(request : Request):
+        return templates.TemplateResponse(
+        "register.html",{"request":request}
+    )
+
+
+
 
 @user_app.get('/logout', response_class=HTMLResponse)
 def protected_route(request: Request,):
@@ -137,6 +149,38 @@ def get_all_flights():
     session =  SessionLocal()
     flights_objects = session.query(flight).all()
     return flights_objects
+
+def get_flight_by_id(flight_id):
+    session =  SessionLocal()
+    flights_object = session.query(flight).get(flight_id)
+    return flights_object
+
+
+def get_flights_booked_by_user(user_id):
+    session = SessionLocal()
+    booked_flights  = session.query(booked_form).filter(
+    user_id == user_id
+    ).all()
+    l = []
+
+    for i in booked_flights:
+        if user_id == i.user_id:
+            l.append(
+            get_flight_by_id(i.flight_id)
+        )
+
+    return l
+
+
+def get_flights_available_for_users(user_id):
+    session = SessionLocal()
+    all_flights = get_all_flights()
+    flights_booked = get_flights_booked_by_user(user_id=user_id)
+    temp = []
+    for i in all_flights:
+        if  i.id not in [k.id for k in flights_booked]:
+            temp.append(i)
+    return temp
 
 
 @user_app.get("/",response_class=HTMLResponse)
@@ -150,7 +194,9 @@ def home(request:Request, user_instance = Depends(manager)):
     return templates.TemplateResponse(
         "home.html",{
             "request":request,
-            "flights" : get_all_flights()
+            "user" : user_instance,
+            "flights" : get_flights_available_for_users(user_instance.id),
+            "flights_book" : get_flights_booked_by_user(user_instance.id)
 
         }
     )
@@ -170,12 +216,36 @@ def create_flight_instance(fl):
     session.close()
 
 
-@user_app.put("/create-flight")
-def create_flight(flight_pd : Flight_Pd):
-    create_flight_instance(flight_pd)
-    return "Done"
+def book_ticket_instance(flight_id, user_id):
+    session = SessionLocal()
+    ticket = booked_form(
+        user_id = user_id,
+        flight_id = flight_id
+    )
+    flight_obj = session.query(flight).get(flight_id)
+    flight_obj.seat = flight_obj.seat -1
+    session.add(flight_obj)
+    session.add(ticket)
+
+    session.commit()
+    session.close()
 
 
+# @user_app.post("/create-flight")
+# def create_flight(flight_pd : Flight_Pd):
+#     create_flight_instance(flight_pd)
+#     return "Done"
+
+
+@user_app.post("/book-ticket")
+def book_ticket(book_ticket : BookTicketPd):
+    """
+        booking ticket
+    """
+    book_ticket_instance(book_ticket.flight_id,book_ticket.user_id)
+    print("called")
+    print(book_ticket.flight_id,book_ticket.user_id)
+    return "done"
 
 
 

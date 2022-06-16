@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<head>
+    <!-- <link href="style.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <script src="{{ url_for('static',path='main.js') }}"> </script>
+    <!-- <script src="main.js"></script> -->
+<div class="login">
+    <form id="register-form">
+    <div class="form">
+
+
+      <h2>Register User</h2>
+      <div class="form-field" >
+        <label for="username"><i class="fa fa-user"></i></label>
+        <input id="username" type="text" name="mail" placeholder="Usename" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+      <div class="form-field">
+        <label for="password"><i class="fa fa-lock"></i></label>
+        <input id="password" type="password" name="password" placeholder="Password" pattern=".{6,}" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+
+      <div class="form-field">
+        <label for="name"><i class="fa fa-lock"></i></label>
+        <input id="name" type="text" name="name" placeholder="Name" pattern=".{6,}" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+
+      <div class="form-field">
+        <label for="location"><i class="fa fa-lock"></i></label>
+        <input id="location" type="text" name="location" placeholder="Location" pattern=".{6,}" required>
+        <svg>
+          <use href="#svg-check" />
+        </svg>
+      </div>
+
+
+      <button type="submit" class="button" onclick="register()" >
+        <div class="arrow-wrapper">
+          <span class="arrow"></span>
+        </div>
+        <p class="button-text">Register</p>
+      </button>
+
+    </div>
+</form>
+    <div class="finished">
+      <svg>
+        <use href="#svg-check" />
+
+
+      </svg>
+
+    </div>
+    <p style="position: relative ; left: 10%;"> Already having an account  ? ,<a style="color:blue" href="/login"><b>Login in  </b ></a>  </p>
+  </div>
+
+
+  <!-- //--- ## SVG SYMBOLS ############# -->
+  <svg style="display:none;">
+    <symbol id="svg-check" viewBox="0 0 130.2 130.2">
+      <polyline points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+    </symbol>
+  </svg>
+</body>
+<script>
+
+
+function register(){
+
+// validate for register user.
+// Checking password.
+let formdata = document.getElementById("register-form");
+const XHR = new XMLHttpRequest();
+
+  XHR.addEventListener( "error", function( event ) {
+    alert( 'Oops something went wrong' );
+  } );
+
+  // Define what happens on successful data submission
+  XHR.addEventListener( "load", function(event) {
+
+    if(XHR.status == 200){
+        // redirect to login page.
+      window.location.replace(window.location.origin+"/");
+    }
+    else{
+      alert(" User Already exist");
+    }
+
+  } );
+
+  // Set up our request
+  XHR.open( "POST", window.location.origin+"/create-user");
+
+  XHR.setRequestHeader("Access-Control-Allow-Origin",window.location.origin);
+  XHR.setRequestHeader("Access-Control-Allow-Credentials", "true");
+  XHR.setRequestHeader("Access-Control-Allow-Methods", "POST");
+  XHR.setRequestHeader('Content-Type', 'application/json')
+  // The data sent is what the user provided in the form
+  data = {
+    "username": formdata.username.value,
+    "name": formdata.name.value,
+    "password": formdata.password.value,
+
+
+    "location": formdata.location.value
+  }
+  XHR.send( JSON.stringify( data ));
+
+
+}
+
+
+</script>
+</html>
